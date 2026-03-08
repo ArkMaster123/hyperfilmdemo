@@ -287,7 +287,7 @@ function addTwoColumnSlide(pptx: PptxGenJS, slide: SlideContent, style: StyleCon
     y: 1.3,
     w: 0.02,
     h: 3.5,
-    fill: { color: style.accent.replace('#', '') + '40' },
+    fill: { color: style.accent.replace('#', ''), transparency: 75 },
   });
 
   // Right column

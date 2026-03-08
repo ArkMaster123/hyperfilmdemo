@@ -54,6 +54,7 @@ export default function SkillPage() {
   const [jobId, setJobId] = useState("");
   const [error, setError] = useState("");
   const eventSourceRef = useRef<EventSource | null>(null);
+  const completedRef = useRef(false);
 
   // Fetch schema on mount
   useEffect(() => {
@@ -80,6 +81,7 @@ export default function SkillPage() {
       setCurrentProgress(0);
       setPreviewHtml("");
       setError("");
+      completedRef.current = false;
 
       try {
         const res = await fetch("/api/generate", {
@@ -110,8 +112,9 @@ export default function SkillPage() {
         });
 
         es.addEventListener("complete", (e) => {
+          completedRef.current = true;
           const data = JSON.parse(e.data);
-          setPreviewHtml(data.previewHtml || "");
+          setPreviewHtml(data.preview || "");
           setFilename(data.filename || "output.html");
           setCurrentProgress(100);
           setState("complete");
@@ -119,6 +122,7 @@ export default function SkillPage() {
         });
 
         es.addEventListener("error", (e) => {
+          if (completedRef.current) return; // stream closed after complete — ignore
           if (e instanceof MessageEvent) {
             const data = JSON.parse(e.data);
             setError(data.message || "Generation failed");
@@ -130,6 +134,7 @@ export default function SkillPage() {
         });
 
         es.onerror = () => {
+          if (completedRef.current) return; // stream closed after complete — ignore
           setState((prev) => {
             if (prev === "generating") {
               setError("Connection lost during generation");

@@ -85,7 +85,7 @@ class JobStore {
       start: (controller) => {
         // Replay existing events
         for (const event of job.events) {
-          controller.enqueue(`data: ${JSON.stringify(event)}\n\n`);
+          controller.enqueue(`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`);
         }
 
         // If job is already terminal, close immediately
@@ -97,7 +97,7 @@ class JobStore {
         // Listen for new events
         listener = (event: JobEvent) => {
           try {
-            controller.enqueue(`data: ${JSON.stringify(event)}\n\n`);
+            controller.enqueue(`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`);
             if (event.type === 'complete' || event.type === 'error') {
               controller.close();
               this.removeListener(jobId, listener!);
@@ -136,5 +136,11 @@ class JobStore {
   }
 }
 
-// Singleton instance
-export const jobStore = new JobStore();
+// Singleton instance — use globalThis to survive Next.js module reloads
+const globalForJobStore = globalThis as unknown as { __jobStore?: JobStore };
+
+if (!globalForJobStore.__jobStore) {
+  globalForJobStore.__jobStore = new JobStore();
+}
+
+export const jobStore = globalForJobStore.__jobStore;

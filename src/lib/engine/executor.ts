@@ -22,7 +22,7 @@ export async function executeSkill(
 
   try {
     const stream = client.messages.stream({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 8192,
       system: skill.systemPrompt,
       messages: [{ role: 'user', content: userMessage }],
@@ -62,19 +62,13 @@ export async function executeSkill(
     // Run output pipeline
     const output = await skill.outputPipeline(rawOutput, inputs);
 
-    // Send preview
-    jobStore.addEvent(jobId, {
-      type: 'preview',
-      preview: output.preview,
-      progress: 95,
-    });
-
-    // Complete
+    // Complete — include preview in the complete event
     jobStore.completeJob(jobId, output);
     jobStore.addEvent(jobId, {
       type: 'complete',
       message: 'Done!',
       filename: output.filename,
+      preview: output.preview,
       progress: 100,
     });
   } catch (error: any) {
