@@ -10,6 +10,7 @@ import { SkillForm, type FieldSchema } from "@/components/skill-form";
 import { GenerationProgress } from "@/components/generation-progress";
 import { OutputPreview } from "@/components/output-preview";
 import { DownloadButton } from "@/components/download-button";
+import { DeckAgentPanel } from "@/components/deck-agent-panel";
 
 type PageState = "idle" | "loading-schema" | "generating" | "complete" | "error";
 
@@ -165,6 +166,12 @@ export default function SkillPage() {
     setFilename("");
   }, []);
 
+  const handleEdited = useCallback((data: { preview: string; filename: string }) => {
+    setPreviewHtml(data.preview || "");
+    setFilename(data.filename || filename);
+    setState("complete");
+  }, [filename]);
+
   if (!skill) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background bg-grid">
@@ -206,8 +213,8 @@ export default function SkillPage() {
           </Link>
         </nav>
 
-        {/* Two-column layout */}
-        <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+        {/* Main layout */}
+        <div className="grid gap-8 lg:grid-cols-[1fr_1fr_320px] lg:gap-8">
           {/* Left column -- Skill info + Form */}
           <div className="animate-fade-in">
             {/* Skill header */}
@@ -314,6 +321,15 @@ export default function SkillPage() {
                 </Button>
               </div>
             )}
+          </div>
+
+          {/* Right rail -- Agent editing */}
+          <div className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
+            <DeckAgentPanel
+              jobId={jobId}
+              canEdit={state === "complete" && filename.toLowerCase().endsWith(".pptx")}
+              onEdited={handleEdited}
+            />
           </div>
         </div>
       </div>

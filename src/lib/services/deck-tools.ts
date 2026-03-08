@@ -11,6 +11,13 @@ import { generateDiagramSvg, type DiagramType } from "./diagrams";
 // Store generated assets in memory for the current job
 const assetStore = new Map<string, { type: "image" | "diagram"; data: Buffer; mimeType: string }>();
 
+export type SerializedDeckAsset = {
+  id: string;
+  type: "image" | "diagram";
+  mimeType: string;
+  dataBase64: string;
+};
+
 export function clearAssets() {
   assetStore.clear();
 }
@@ -21,6 +28,26 @@ export function getAsset(id: string) {
 
 export function getAllAssets() {
   return Object.fromEntries(assetStore.entries());
+}
+
+export function snapshotAssets(): SerializedDeckAsset[] {
+  return Array.from(assetStore.entries()).map(([id, asset]) => ({
+    id,
+    type: asset.type,
+    mimeType: asset.mimeType,
+    dataBase64: asset.data.toString("base64"),
+  }));
+}
+
+export function restoreAssets(assets: SerializedDeckAsset[]) {
+  assetStore.clear();
+  for (const asset of assets) {
+    assetStore.set(asset.id, {
+      type: asset.type,
+      mimeType: asset.mimeType,
+      data: Buffer.from(asset.dataBase64, "base64"),
+    });
+  }
 }
 
 export const deckToolsServer = createSdkMcpServer({

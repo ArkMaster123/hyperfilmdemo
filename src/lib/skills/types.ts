@@ -22,6 +22,7 @@ export interface GeneratedOutput {
   contentType: string;
   data: Buffer;
   preview: string; // HTML string for in-browser preview
+  meta?: Record<string, unknown>;
 }
 
 export interface JobEvent {

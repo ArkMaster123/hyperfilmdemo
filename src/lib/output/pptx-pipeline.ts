@@ -1,6 +1,45 @@
 import PptxGenJS from 'pptxgenjs';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import crypto from 'node:crypto';
 import { GeneratedOutput } from '../skills/types';
 import { getAsset } from '../services/deck-tools';
+
+const ASSET_TMP_DIR = path.join(os.tmpdir(), 'digiforge-pptx-assets');
+
+function mimeToExt(mimeType: string): string {
+  switch (mimeType) {
+    case 'image/jpeg':
+      return 'jpg';
+    case 'image/png':
+      return 'png';
+    case 'image/gif':
+      return 'gif';
+    case 'image/webp':
+      return 'webp';
+    case 'image/svg+xml':
+      return 'svg';
+    default:
+      return 'bin';
+  }
+}
+
+function ensureAssetPath(data: Buffer, mimeType: string): string {
+  if (!fs.existsSync(ASSET_TMP_DIR)) {
+    fs.mkdirSync(ASSET_TMP_DIR, { recursive: true });
+  }
+
+  const ext = mimeToExt(mimeType);
+  const hash = crypto.createHash('sha1').update(data).digest('hex').slice(0, 16);
+  const filePath = path.join(ASSET_TMP_DIR, `${hash}.${ext}`);
+
+  if (!fs.existsSync(filePath)) {
+    fs.writeFileSync(filePath, data);
+  }
+
+  return filePath;
+}
 
 /**
  * Embed an image or diagram asset on a PPTX slide.
@@ -15,23 +54,22 @@ function embedAsset(
   if (!assetId) return;
   const asset = getAsset(assetId);
   if (!asset) return;
-
-  const dataUri = `data:${asset.mimeType};base64,${asset.data.toString('base64')}`;
+  const assetPath = ensureAssetPath(asset.data, asset.mimeType);
 
   switch (position) {
     case 'full':
-      slide.addImage({ data: dataUri, x: 0, y: 0, w: '100%', h: '100%', sizing: { type: 'cover', w: 10, h: 5.63 } });
+      slide.addImage({ path: assetPath, x: 0, y: 0, w: '100%', h: '100%', sizing: { type: 'cover', w: 10, h: 5.63 } });
       break;
     case 'right-half':
-      slide.addImage({ data: dataUri, x: 5.2, y: 0.8, w: 4.3, h: 3.8, sizing: { type: 'cover', w: 4.3, h: 3.8 }, rounding: true });
+      slide.addImage({ path: assetPath, x: 5.2, y: 0.8, w: 4.3, h: 3.8, sizing: { type: 'cover', w: 4.3, h: 3.8 }, rounding: true });
       break;
     case 'center-below-title':
-      slide.addImage({ data: dataUri, x: 0.8, y: 1.3, w: 8.4, h: 3.5, sizing: { type: 'contain', w: 8.4, h: 3.5 } });
+      slide.addImage({ path: assetPath, x: 0.8, y: 1.3, w: 8.4, h: 3.5, sizing: { type: 'contain', w: 8.4, h: 3.5 } });
       break;
   }
 }
 
-interface SlideContent {
+export interface SlideContent {
   type: 'title' | 'content' | 'two-column' | 'closing';
   title: string;
   subtitle?: string;
@@ -87,7 +125,7 @@ const STYLES: Record<string, StyleConfig> = {
   },
 };
 
-function parseSlides(rawOutput: string): SlideContent[] {
+export function parseSlides(rawOutput: string): SlideContent[] {
   // Strip markdown code fences if present
   let cleaned = rawOutput.trim();
   if (cleaned.startsWith('```')) {
@@ -533,6 +571,13 @@ function generateSlidePreviewHtml(slides: SlideContent[], style: StyleConfig, co
 
 export async function createPptxOutput(rawOutput: string, inputs: Record<string, any>): Promise<GeneratedOutput> {
   const slides = parseSlides(rawOutput);
+  return createPptxOutputFromSlides(slides, inputs);
+}
+
+export async function createPptxOutputFromSlides(
+  slides: SlideContent[],
+  inputs: Record<string, any>,
+): Promise<GeneratedOutput> {
   const styleName = inputs.style || 'professional';
   const style = STYLES[styleName] || STYLES.professional;
   const companyName = inputs.companyName || '';
@@ -569,5 +614,10 @@ export async function createPptxOutput(rawOutput: string, inputs: Record<string,
     contentType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     data: buffer,
     preview,
+    meta: {
+      slides,
+      styleName,
+      companyName,
+    },
   };
 }

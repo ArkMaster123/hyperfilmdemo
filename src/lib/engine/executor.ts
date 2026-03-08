@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { SkillConfig } from '../skills/types';
 import { jobStore } from './job-store';
+import { snapshotAssets } from '../services/deck-tools';
 
 export async function executeSkill(
   jobId: string,
@@ -184,6 +185,13 @@ async function executeAgentSkill(
     });
 
     const output = await skill.outputPipeline(lastOutput, inputs);
+
+    if (skill.id === 'proposal-deck') {
+      output.meta = {
+        ...(output.meta || {}),
+        deckAssets: snapshotAssets(),
+      };
+    }
 
     jobStore.completeJob(jobId, output);
     jobStore.addEvent(jobId, {
