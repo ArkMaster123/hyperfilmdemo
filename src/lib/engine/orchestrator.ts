@@ -9,8 +9,18 @@ export async function generateProduct(
   const skill = getSkill(skillId);
   if (!skill) throw new Error(`Unknown skill: ${skillId}`);
 
+  // Coerce array values to strings (some form components send arrays)
+  const cleaned: Record<string, any> = {};
+  for (const [key, value] of Object.entries(inputs)) {
+    if (Array.isArray(value)) {
+      cleaned[key] = value[0] ?? '';
+    } else {
+      cleaned[key] = value;
+    }
+  }
+
   // Validate inputs
-  const result = skill.inputSchema.safeParse(inputs);
+  const result = skill.inputSchema.safeParse(cleaned);
   if (!result.success) {
     throw new Error(
       `Invalid inputs: ${result.error.issues.map((i: any) => i.message).join(', ')}`,
