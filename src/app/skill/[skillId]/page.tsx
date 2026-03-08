@@ -208,8 +208,8 @@ export default function SkillPage() {
             {/* Skill header */}
             <div className="mb-8">
               <div className="flex items-start gap-4">
-                <div className="flex size-12 items-center justify-center rounded-xl bg-card ring-1 ring-white/[0.06] text-2xl shrink-0">
-                  {skill.icon}
+                <div className="flex size-12 items-center justify-center rounded-xl bg-card ring-1 ring-white/[0.06] shrink-0">
+                  <skill.icon className="size-6 text-violet-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 flex-wrap">

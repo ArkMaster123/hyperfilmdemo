@@ -1,5 +1,11 @@
 import { SkillConfig } from './types';
 import { promptGuideSkill } from './prompt-guide';
+import { emailTemplatesSkill } from './email-templates';
+import { contentCalendarSkill } from './content-calendar';
+import { iconPackSkill } from './icon-pack';
+import { motionGraphicsSkill } from './motion-graphics';
+import { brandKitSkill } from './brand-kit';
+import { proposalDeckSkill } from './proposal-deck';
 
 const skills = new Map<string, SkillConfig>();
 
@@ -42,3 +48,9 @@ export function getAllSkillsMeta() {
 
 // Register built-in skills
 registerSkill(promptGuideSkill);
+registerSkill(emailTemplatesSkill);
+registerSkill(contentCalendarSkill);
+registerSkill(iconPackSkill);
+registerSkill(motionGraphicsSkill);
+registerSkill(brandKitSkill);
+registerSkill(proposalDeckSkill);
