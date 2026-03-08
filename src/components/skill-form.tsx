@@ -12,7 +12,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Zap } from "lucide-react";
+import { Loader2, Zap, Wand2 } from "lucide-react";
 
 export interface FieldSchema {
   name: string;
@@ -30,12 +30,14 @@ interface SkillFormProps {
   fields: FieldSchema[];
   onSubmit: (data: Record<string, unknown>) => void;
   disabled?: boolean;
+  skillId?: string;
 }
 
 export function SkillForm({
   fields,
   onSubmit,
   disabled = false,
+  skillId,
 }: SkillFormProps) {
   const [formData, setFormData] = useState<Record<string, unknown>>(() => {
     const initial: Record<string, unknown> = {};
@@ -54,6 +56,7 @@ export function SkillForm({
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAutoFilling, setIsAutoFilling] = useState(false);
 
   const updateField = useCallback((name: string, value: unknown) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -65,9 +68,64 @@ export function SkillForm({
     onSubmit(formData);
   };
 
-  // Determine if a string field should be a textarea (heuristic: description-like labels)
+  const handleAutoFill = async () => {
+    if (!skillId || isAutoFilling) return;
+
+    // Check if at least one field is filled
+    const hasFilledField = Object.entries(formData).some(
+      ([, v]) => v && v !== "" && v !== 0 && v !== false
+    );
+
+    if (!hasFilledField) return;
+
+    setIsAutoFilling(true);
+    try {
+      const res = await fetch("/api/autofill", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          skillId,
+          filledFields: formData,
+          allFieldNames: fields.map((f) => f.name),
+        }),
+      });
+
+      if (!res.ok) throw new Error("Autofill failed");
+
+      const { suggestions } = await res.json();
+
+      if (suggestions && typeof suggestions === "object") {
+        setFormData((prev) => {
+          const updated = { ...prev };
+          for (const [key, value] of Object.entries(suggestions)) {
+            // Only fill empty fields
+            if (!updated[key] || updated[key] === "") {
+              updated[key] = value;
+            }
+          }
+          return updated;
+        });
+      }
+    } catch {
+      // Silently fail — not critical
+    } finally {
+      setIsAutoFilling(false);
+    }
+  };
+
+  // Check if autofill should be available
+  const hasAnyFilled = Object.entries(formData).some(
+    ([, v]) => v && v !== "" && v !== 0 && v !== false
+  );
+  const hasAnyEmpty = fields.some((f) => {
+    const val = formData[f.name];
+    return !val || val === "" || val === 0;
+  });
+  const showAutoFill = skillId && hasAnyFilled && hasAnyEmpty;
+
+  // Determine if a string field should be a textarea
   const isLongText = (field: FieldSchema) => {
-    const longKeywords = ["description", "details", "notes", "content", "body", "message", "additional"];
+    const longKeywords = ["description", "details", "notes", "content", "body", "message", "additional", "points", "keyPoints"];
     return longKeywords.some((kw) =>
       field.name.toLowerCase().includes(kw) || field.label.toLowerCase().includes(kw)
     );
@@ -79,7 +137,6 @@ export function SkillForm({
     <form onSubmit={handleSubmit} className="space-y-5">
       {fields.map((field) => (
         <div key={field.name} className="space-y-2">
-          {/* Don't show label for boolean since we show it inline */}
           {field.type !== "boolean" && (
             <Label
               htmlFor={field.name}
@@ -190,12 +247,35 @@ export function SkillForm({
         </div>
       ))}
 
-      <div className="pt-3">
+      <div className="flex gap-3 pt-3">
+        {showAutoFill && (
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            disabled={loading || isAutoFilling}
+            onClick={handleAutoFill}
+            className="gap-2 h-10 border-violet-500/30 text-violet-400 hover:bg-violet-500/10 hover:text-violet-300 hover:border-violet-500/50 transition-all"
+          >
+            {isAutoFilling ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Filling...
+              </>
+            ) : (
+              <>
+                <Wand2 className="size-4" />
+                Magic Fill
+              </>
+            )}
+          </Button>
+        )}
+
         <Button
           type="submit"
           size="lg"
           disabled={loading}
-          className="w-full gap-2 h-10 bg-foreground text-background hover:bg-foreground/90 font-medium"
+          className="flex-1 gap-2 h-10 bg-foreground text-background hover:bg-foreground/90 font-medium"
         >
           {loading ? (
             <>

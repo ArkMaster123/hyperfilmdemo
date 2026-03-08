@@ -250,6 +250,7 @@ export default function SkillPage() {
                   fields={fields}
                   onSubmit={handleGenerate}
                   disabled={state === "generating"}
+                  skillId={skillId}
                 />
               )}
             </div>
