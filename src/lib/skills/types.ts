@@ -11,6 +11,10 @@ export interface SkillConfig {
   systemPrompt: string;
   outputFormat: 'html' | 'pptx' | 'zip' | 'png-zip' | 'svg-zip';
   outputPipeline: (rawOutput: string, inputs: Record<string, any>) => Promise<GeneratedOutput>;
+  /** If true, this skill uses the Claude Agent SDK with tools instead of simple message streaming */
+  agentMode?: boolean;
+  /** MCP server config for agent-mode skills — provides tools the agent can call */
+  mcpServerFactory?: () => { server: any; cleanup: () => void };
 }
 
 export interface GeneratedOutput {

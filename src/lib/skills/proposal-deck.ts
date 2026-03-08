@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { SkillConfig } from './types';
 import { createPptxOutput } from '../output/pptx-pipeline';
+import { deckToolsServer, clearAssets } from '../services/deck-tools';
 
 const inputSchema = z.object({
   companyName: z
@@ -23,49 +24,72 @@ const inputSchema = z.object({
     .describe('Visual style for the deck'),
 });
 
-const systemPrompt = `You are an expert business strategist and presentation designer. You create compelling, well-structured proposal decks.
+const systemPrompt = `You are an expert business strategist and presentation designer creating Gamma.ai-quality proposal decks.
 
-OUTPUT FORMAT: You must output ONLY valid JSON. No markdown, no code fences, no explanation — just a raw JSON array.
+You have access to two powerful tools:
+- **fetch_image**: Fetch relevant stock photos for slides (use for hero images, team photos, product visuals)
+- **create_diagram**: Create professional business diagrams (timelines, process flows, metrics, pyramids, funnels, comparisons)
 
-The JSON must be an array of slide objects. Each slide object has these fields:
-- "type": one of "title", "content", "two-column", or "closing"
-- "title": string — the slide heading
-- "subtitle": string (optional) — a subtitle or tagline
-- "body": string (optional) — paragraph text for the slide
-- "bullets": string[] (optional) — array of bullet point strings
-- "leftContent": string[] (optional, for two-column type) — bullet points for left column
-- "rightContent": string[] (optional, for two-column type) — bullet points for right column
+WORKFLOW:
+1. First, plan the deck structure (8-12 slides)
+2. For each slide, decide: does it need an IMAGE, a DIAGRAM, or text-only?
+3. Call fetch_image or create_diagram for slides that benefit from visuals
+4. Output the final JSON with asset references
+
+USE VISUALS GENEROUSLY — a great deck has images or diagrams on at least 50% of slides. Think like a top-tier consultancy (McKinsey, Bain).
+
+Good use of diagrams:
+- Timeline slide → create_diagram with type "timeline"
+- Process/how-it-works → create_diagram with type "process"
+- Key metrics/stats → create_diagram with type "metrics" (use "value: label" format)
+- Before/after or comparison → create_diagram with type "comparison"
+- Market funnel → create_diagram with type "funnel"
+
+Good use of images:
+- Title/hero slide → fetch_image for an inspiring hero image
+- Team slide → fetch_image for team/people photo
+- Product/solution slide → fetch_image for relevant visual
+
+OUTPUT FORMAT: After using tools, output ONLY valid JSON — a raw JSON array of slide objects.
+
+Each slide object has:
+- "type": "title" | "content" | "two-column" | "closing"
+- "title": string
+- "subtitle": string (optional)
+- "body": string (optional)
+- "bullets": string[] (optional)
+- "leftContent": string[] (optional, for two-column)
+- "rightContent": string[] (optional, for two-column)
+- "imageAssetId": string (optional — asset ID from fetch_image)
+- "diagramAssetId": string (optional — asset ID from create_diagram)
 
 RULES:
-1. Generate 8-12 slides total
-2. The first slide MUST be type "title" with the company name and proposal purpose
-3. The last slide MUST be type "closing" (e.g. "Thank You", "Next Steps", or "Let's Connect")
-4. Use a mix of "content" and "two-column" slides for the body
-5. Each bullet point should be concise but substantive (10-20 words max)
-6. Include slides covering: problem/opportunity, solution, key benefits, market/traction, team/capabilities, timeline, and ask/next steps as appropriate
-7. Write persuasively — this is a proposal meant to convince
-8. Tailor the tone and content to the stated purpose
-9. Do NOT include any text outside the JSON array
-10. Ensure the JSON is valid and parseable
-
-Example output structure:
-[
-  {"type":"title","title":"Acme Corp","subtitle":"Series A Funding Proposal"},
-  {"type":"content","title":"The Opportunity","bullets":["Market is growing at 25% YoY","Current solutions leave gaps in X","Our approach uniquely solves Y"]},
-  {"type":"two-column","title":"Our Solution","leftContent":["Feature A does X","Feature B does Y"],"rightContent":["Benefit 1","Benefit 2"]},
-  {"type":"closing","title":"Thank You","subtitle":"Let's build the future together","bullets":["email@company.com","www.company.com"]}
-]`;
+1. Generate 8-12 slides
+2. First slide = "title" type with company name
+3. Last slide = "closing" type
+4. Use a mix of content types
+5. Bullet points: concise, 10-20 words max
+6. Write persuasively
+7. Include: problem, solution, benefits, market/traction, timeline, next steps
+8. After all tool calls, output ONLY the JSON array — no other text`;
 
 export const proposalDeckSkill: SkillConfig = {
   id: 'proposal-deck',
   name: 'Proposal Deck',
-  description:
-    'Generate professional pitch decks as PowerPoint files. Creates polished, persuasive presentations with consistent styling and smart layouts.',
+  description: 'Generate professional pitch decks with images and business diagrams — Gamma.ai quality',
   difficulty: 'medium',
-  icon: '\u{1F4CA}',
+  icon: '📊',
   category: 'Business',
   inputSchema,
   systemPrompt,
   outputFormat: 'pptx',
   outputPipeline: createPptxOutput,
+  agentMode: true,
+  mcpServerFactory: () => {
+    clearAssets();
+    return {
+      server: deckToolsServer,
+      cleanup: () => clearAssets(),
+    };
+  },
 };

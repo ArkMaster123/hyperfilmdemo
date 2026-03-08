@@ -1,5 +1,35 @@
 import PptxGenJS from 'pptxgenjs';
 import { GeneratedOutput } from '../skills/types';
+import { getAsset } from '../services/deck-tools';
+
+/**
+ * Embed an image or diagram asset on a PPTX slide.
+ * Images are placed as background or half-width.
+ * Diagrams are placed centered below the title.
+ */
+function embedAsset(
+  slide: any,
+  assetId: string | undefined,
+  position: 'full' | 'right-half' | 'center-below-title'
+) {
+  if (!assetId) return;
+  const asset = getAsset(assetId);
+  if (!asset) return;
+
+  const dataUri = `data:${asset.mimeType};base64,${asset.data.toString('base64')}`;
+
+  switch (position) {
+    case 'full':
+      slide.addImage({ data: dataUri, x: 0, y: 0, w: '100%', h: '100%', sizing: { type: 'cover', w: 10, h: 5.63 } });
+      break;
+    case 'right-half':
+      slide.addImage({ data: dataUri, x: 5.2, y: 0.8, w: 4.3, h: 3.8, sizing: { type: 'cover', w: 4.3, h: 3.8 }, rounding: true });
+      break;
+    case 'center-below-title':
+      slide.addImage({ data: dataUri, x: 0.8, y: 1.3, w: 8.4, h: 3.5, sizing: { type: 'contain', w: 8.4, h: 3.5 } });
+      break;
+  }
+}
 
 interface SlideContent {
   type: 'title' | 'content' | 'two-column' | 'closing';
@@ -9,6 +39,8 @@ interface SlideContent {
   bullets?: string[];
   leftContent?: string[];
   rightContent?: string[];
+  imageAssetId?: string;
+  diagramAssetId?: string;
 }
 
 interface StyleConfig {
@@ -82,6 +114,8 @@ function parseSlides(rawOutput: string): SlideContent[] {
     bullets: Array.isArray(slide.bullets) ? slide.bullets : undefined,
     leftContent: Array.isArray(slide.leftContent) ? slide.leftContent : undefined,
     rightContent: Array.isArray(slide.rightContent) ? slide.rightContent : undefined,
+    imageAssetId: slide.imageAssetId,
+    diagramAssetId: slide.diagramAssetId,
   }));
 }
 
@@ -156,6 +190,10 @@ function addContentSlide(pptx: PptxGenJS, slide: SlideContent, style: StyleConfi
   const s = pptx.addSlide();
   s.background = { color: style.bg.replace('#', '') };
 
+  // If there's a diagram or image, use split layout
+  const hasVisual = slide.diagramAssetId || slide.imageAssetId;
+  const textWidth = hasVisual ? 4.5 : 8.8;
+
   // Left accent bar
   s.addShape(pptx.ShapeType.rect, {
     x: 0,
@@ -169,7 +207,7 @@ function addContentSlide(pptx: PptxGenJS, slide: SlideContent, style: StyleConfi
   s.addText(slide.title, {
     x: 0.6,
     y: 0.3,
-    w: 8.8,
+    w: textWidth,
     h: 0.7,
     fontSize: 28,
     fontFace: 'Arial',
@@ -185,6 +223,13 @@ function addContentSlide(pptx: PptxGenJS, slide: SlideContent, style: StyleConfi
     h: 0.03,
     fill: { color: style.accent.replace('#', '') },
   });
+
+  // Embed visual on right half if available
+  if (slide.diagramAssetId) {
+    embedAsset(s, slide.diagramAssetId, 'right-half');
+  } else if (slide.imageAssetId) {
+    embedAsset(s, slide.imageAssetId, 'right-half');
+  }
 
   // Body text or bullets
   const contentY = 1.3;
@@ -204,7 +249,7 @@ function addContentSlide(pptx: PptxGenJS, slide: SlideContent, style: StyleConfi
     s.addText(textItems, {
       x: 0.8,
       y: contentY,
-      w: 8.4,
+      w: hasVisual ? 4.0 : 8.4,
       h: contentH,
       valign: 'top',
     });
@@ -212,7 +257,7 @@ function addContentSlide(pptx: PptxGenJS, slide: SlideContent, style: StyleConfi
     s.addText(slide.body, {
       x: 0.8,
       y: contentY,
-      w: 8.4,
+      w: hasVisual ? 4.0 : 8.4,
       h: contentH,
       fontSize: 16,
       fontFace: 'Arial',
