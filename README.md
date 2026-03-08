@@ -20,7 +20,7 @@
 
 ## What is this?
 
-DigiForge is a demo application that replaces manual creative agency work with AI-powered agents. Built for [Hyper Film](https://www.hyper.film/) to evaluate whether AI can generate the same digital products currently sold on [digi-vault.co](https://www.digi-vault.co/) — at a fraction of the cost and time.
+DigiForge is a demo application that replaces manual creative agency work with AI-powered agents. Pick a digital product type, provide minimal inputs, and an AI agent generates a complete, professional, downloadable asset in seconds.
 
 Each product type is a **skill** — a self-contained AI agent with its own prompt, input schema, and output pipeline. The system is templateized: adding a new product type means adding one file.
 
@@ -161,15 +161,8 @@ src/
 
 ## Credits
 
-Built by [Hyper Film](https://www.hyper.film/) with Claude Agent SDK.
-
 - AI Generation: [Anthropic Claude](https://anthropic.com)
 - Image Generation: [Google Gemini](https://ai.google.dev)
 - UI Components: [shadcn/ui](https://ui.shadcn.com)
 - PPTX Engine: [pptxgenjs](https://github.com/gitbrent/PptxGenJS)
 
----
-
-<p align="center">
-  <sub>Demo for evaluating AI-powered digital product creation</sub>
-</p>
