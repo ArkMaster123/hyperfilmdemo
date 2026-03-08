@@ -1,7 +1,7 @@
 # Requirements: DigiForge
 
 **Defined:** 2026-03-08
-**Core Value:** A business owner can pick a digital product type, provide minimal inputs, and receive a complete, professional, downloadable asset — generated entirely by AI agents.
+**Core Value:** A business owner can pick a digital product type, provide minimal inputs, and receive a complete, professional, downloadable asset -- generated entirely by AI agents.
 
 ## v1 Requirements
 
@@ -117,55 +117,55 @@ Explicitly excluded. Documented to prevent scope creep.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PIPE-01 | TBD | Pending |
-| PIPE-02 | TBD | Pending |
-| PIPE-03 | TBD | Pending |
-| PIPE-04 | TBD | Pending |
-| PIPE-05 | TBD | Pending |
-| PIPE-06 | TBD | Pending |
-| PIPE-07 | TBD | Pending |
-| AGENT-01 | TBD | Pending |
-| AGENT-02 | TBD | Pending |
-| AGENT-03 | TBD | Pending |
-| AGENT-04 | TBD | Pending |
-| AGENT-05 | TBD | Pending |
-| GUIDE-01 | TBD | Pending |
-| GUIDE-02 | TBD | Pending |
-| GUIDE-03 | TBD | Pending |
-| EMAIL-01 | TBD | Pending |
-| EMAIL-02 | TBD | Pending |
-| EMAIL-03 | TBD | Pending |
-| SOCIAL-01 | TBD | Pending |
-| SOCIAL-02 | TBD | Pending |
-| SOCIAL-03 | TBD | Pending |
-| DECK-01 | TBD | Pending |
-| DECK-02 | TBD | Pending |
-| DECK-03 | TBD | Pending |
-| DECK-04 | TBD | Pending |
-| BRAND-01 | TBD | Pending |
-| BRAND-02 | TBD | Pending |
-| BRAND-03 | TBD | Pending |
-| ICON-01 | TBD | Pending |
-| ICON-02 | TBD | Pending |
-| ICON-03 | TBD | Pending |
-| ICON-04 | TBD | Pending |
-| MOTION-01 | TBD | Pending |
-| MOTION-02 | TBD | Pending |
-| MOTION-03 | TBD | Pending |
-| MOTION-04 | TBD | Pending |
-| UI-01 | TBD | Pending |
-| UI-02 | TBD | Pending |
-| UI-03 | TBD | Pending |
-| UI-04 | TBD | Pending |
-| UI-05 | TBD | Pending |
-| UI-06 | TBD | Pending |
-| UI-07 | TBD | Pending |
+| PIPE-01 | Phase 1 | Pending |
+| PIPE-02 | Phase 1 | Pending |
+| PIPE-03 | Phase 1 | Pending |
+| PIPE-04 | Phase 1 | Pending |
+| PIPE-05 | Phase 1 | Pending |
+| PIPE-06 | Phase 1 | Pending |
+| PIPE-07 | Phase 3 | Pending |
+| AGENT-01 | Phase 1 | Pending |
+| AGENT-02 | Phase 1 | Pending |
+| AGENT-03 | Phase 1 | Pending |
+| AGENT-04 | Phase 1 | Pending |
+| AGENT-05 | Phase 1 | Pending |
+| GUIDE-01 | Phase 2 | Pending |
+| GUIDE-02 | Phase 2 | Pending |
+| GUIDE-03 | Phase 2 | Pending |
+| EMAIL-01 | Phase 2 | Pending |
+| EMAIL-02 | Phase 2 | Pending |
+| EMAIL-03 | Phase 2 | Pending |
+| SOCIAL-01 | Phase 2 | Pending |
+| SOCIAL-02 | Phase 2 | Pending |
+| SOCIAL-03 | Phase 2 | Pending |
+| DECK-01 | Phase 3 | Pending |
+| DECK-02 | Phase 3 | Pending |
+| DECK-03 | Phase 3 | Pending |
+| DECK-04 | Phase 3 | Pending |
+| BRAND-01 | Phase 3 | Pending |
+| BRAND-02 | Phase 3 | Pending |
+| BRAND-03 | Phase 3 | Pending |
+| ICON-01 | Phase 4 | Pending |
+| ICON-02 | Phase 4 | Pending |
+| ICON-03 | Phase 4 | Pending |
+| ICON-04 | Phase 4 | Pending |
+| MOTION-01 | Phase 4 | Pending |
+| MOTION-02 | Phase 4 | Pending |
+| MOTION-03 | Phase 4 | Pending |
+| MOTION-04 | Phase 4 | Pending |
+| UI-01 | Phase 1 | Pending |
+| UI-02 | Phase 1 | Pending |
+| UI-03 | Phase 1 | Pending |
+| UI-04 | Phase 1 | Pending |
+| UI-05 | Phase 1 | Pending |
+| UI-06 | Phase 1 | Pending |
+| UI-07 | Phase 1 | Pending |
 
 **Coverage:**
 - v1 requirements: 43 total
-- Mapped to phases: 0
-- Unmapped: 43 ⚠️
+- Mapped to phases: 43
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-08*
-*Last updated: 2026-03-08 after initial definition*
+*Last updated: 2026-03-08 after roadmap creation*
